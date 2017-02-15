@@ -1,10 +1,6 @@
 package com.psklf.forcestop;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
-import android.app.Application;
-import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -22,22 +18,22 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
-    private RecyclerView.Adapter mAdapter;
+    private MyRecyclerViewAdapter mAdapter;
     private ArrayList<AppServiceInfo> mAppServiceInfoList;
-
+    private ExecutorService mExecutorService;
     private Handler mRecyclerViewHandler;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,36 +52,34 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mRecyclerViewHandler = new Handler(Looper.getMainLooper()) {
-            /**
-             * Subclasses must implement this to receive messages.
-             *
-             * @param msg
-             */
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case PublicConstants.MSG_FORCE_STOP_APP:
-                        stopIt(msg.arg1);
+                        final int position = msg.arg1;
+                        stopApp(position);
+                        break;
+                    case PublicConstants.MSG_STOP_FINISHED:
+                        final int removePosition = msg.arg1;
+                        removeItem(removePosition);
+                        break;
+                    case PublicConstants.MSG_CHECK_SERVICE_FINISH:
+                        initRecyclerView();
+                        break;
+                    default:
                         break;
                 }
             }
         };
 
-        getPkgList();
+        mExecutorService = Executors.newFixedThreadPool(5);
 
-        initRecyclerView();
-    }
-
-    private void initRecyclerView() {
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        // String[] namesStr = mServiceNamesList.toArray(new String[mServiceNamesList.size()]);
-        AppServiceInfo[] appServiceInfos = mAppServiceInfoList.toArray(
-                new AppServiceInfo[mAppServiceInfoList.size()]);
-        mAdapter = new MyRecyclerViewAdapter(appServiceInfos, mRecyclerViewHandler,
-                getApplicationContext());
-        mRecyclerView.setAdapter(mAdapter);
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                getPkgList();
+            }
+        });
     }
 
     @Override
@@ -110,18 +104,56 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void stopIt(int position) {
+    private void stopApp(final int position) {
         AppServiceInfo appServiceInfo = mAppServiceInfoList.get(position);
         if (appServiceInfo == null) {
             return;
         }
 
-        try {
-            String pkgName = appServiceInfo.getPackageName();
-            runShellCommand("am force-stop " + pkgName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        final String pkgName = appServiceInfo.getPackageName();
+
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (runShellCommand("am force-stop " + pkgName) != 0) {
+                        Log.e(TAG, "Run command error");
+                        return;
+                    }
+
+                    // use handler to notify the main thread
+                    // with position info
+                    Message msg = mRecyclerViewHandler.obtainMessage(PublicConstants
+                            .MSG_STOP_FINISHED);
+                    msg.arg1 = position;
+                    msg.sendToTarget();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void removeItem(int removePosition) {
+        // first remove data from the source list
+
+        // update adapter
+        mAdapter.removeData(removePosition);
+
+    }
+
+    /**
+     * Add recycler view, this must be called in the main thread
+     */
+    private void initRecyclerView() {
+        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // create a new adapter for recycler view
+        mAdapter = new MyRecyclerViewAdapter(mAppServiceInfoList, mRecyclerViewHandler,
+                getApplicationContext());
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     private void getPkgList() {
@@ -152,7 +184,6 @@ public class MainActivity extends AppCompatActivity {
                     // add to list
                     // judge if exist
                     boolean ifExist = false;
-                    // CharSequence lable = applicationInfo.loadLabel(packageManager);
 
                     for (AppServiceInfo appServiceInfo : mAppServiceInfoList) {
                         if (appServiceInfo.getPackageName().equals(pkgName)) {
@@ -173,10 +204,18 @@ public class MainActivity extends AppCompatActivity {
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             }
-        }
+        }  // end of service loop
+
+        mRecyclerViewHandler.obtainMessage(PublicConstants.MSG_CHECK_SERVICE_FINISH).sendToTarget();
     }
 
-    private void runShellCommand(String command) throws Exception {
+    /**
+     * @param command
+     * @return
+     * @throws Exception
+     */
+    private int runShellCommand(String command) throws Exception {
+        int ret = 0;
         // get super user grant
         ProcessBuilder processBuilder = new ProcessBuilder("su");
         Process p = processBuilder.start();
@@ -206,13 +245,16 @@ public class MainActivity extends AppCompatActivity {
         }
         while ((s = errorResult.readLine()) != null) {
             errorMsg.append(s);
-            Log.i(TAG, "error " + successMsg);
+            Log.i(TAG, "error " + errorMsg);
+            ret = 1;
         }
 
         // close stream
         dataOutputStream.close();
         successResult.close();
         errorResult.close();
+
+        return ret;
     }
 
 }

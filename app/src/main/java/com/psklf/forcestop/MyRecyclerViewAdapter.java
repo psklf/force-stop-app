@@ -14,6 +14,8 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 /**
  * Created by zhuyuanxuan on 13/02/2017.
  * ForceStop
@@ -21,7 +23,7 @@ import android.widget.TextView;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter
         .MyViewHolder> {
-    private AppServiceInfo[] mNameArray;
+    private ArrayList<AppServiceInfo> mNameArray;
     private Handler mHandler;
     private Context mCtx;
 
@@ -37,8 +39,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         }
     }
 
-    public MyRecyclerViewAdapter(AppServiceInfo[] appServiceInfoArray, Handler handler, Context
-            ctx) {
+    public MyRecyclerViewAdapter(ArrayList<AppServiceInfo> appServiceInfoArray,
+                                 Handler handler,
+                                 Context ctx) {
         mNameArray = appServiceInfoArray;
         mHandler = handler;
         mCtx = ctx;
@@ -68,9 +71,8 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_view,
                 parent, false);
-        MyViewHolder vh = new MyViewHolder(v);
 
-        return vh;
+        return new MyViewHolder(v);
     }
 
     /**
@@ -96,16 +98,14 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
         PackageManager packageManager = mCtx.getPackageManager();
-        CharSequence label = mNameArray[position].getApplicationInfo().loadLabel(packageManager);
+        CharSequence label = mNameArray.get(position).getApplicationInfo().loadLabel
+                (packageManager);
         holder.mTextView.setText(label);
 
         holder.mItemSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (!isChecked) {
-                    // CharSequence text = "Close!";
-                    // Toast toast = Toast.makeText(, text, LENGTH_LONG);
-                    Log.i("xx", "Close: " + holder.getAdapterPosition());
                     Message msg = mHandler.obtainMessage(PublicConstants.MSG_FORCE_STOP_APP);
                     msg.arg1 = holder.getAdapterPosition();
                     msg.sendToTarget();
@@ -121,6 +121,16 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
      */
     @Override
     public int getItemCount() {
-        return mNameArray.length;
+        return mNameArray.size();
+    }
+
+    public void removeData(int pos) {
+        Log.i("xx", "pos " + pos + " size" + mNameArray.size());
+        // first remove data from the array list
+        mNameArray.remove(pos);
+
+        // notify self
+        notifyItemRemoved(pos);
+        notifyItemRangeChanged(pos, mNameArray.size());
     }
 }
