@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:background="#e0e7e7">
+
+    <ImageView
+        android:id="@+id/imgv_icon"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        />
+    <android.widget.Switch
+        android:id="@+id/switch_item"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp"
+        android:checked="true"/>
+
+    <TextView
+        android:layout_toStartOf="@+id/switch_item"
+        android:layout_toEndOf="@+id/imgv_icon"
+        android:id="@+id/tv_service_name"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="3dp"
+        android:layout_marginEnd="10dp"
+        />
+</RelativeLayout>
