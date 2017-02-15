@@ -36,8 +36,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private RecyclerView.Adapter mAdapter;
-    private ArrayList<String> mServiceNamesList;
-    private ArrayList<String> mPkgNameList;
     private ArrayList<AppServiceInfo> mAppServiceInfoList;
 
     private Handler mRecyclerViewHandler;
@@ -76,13 +74,6 @@ public class MainActivity extends AppCompatActivity {
         getPkgList();
 
         initRecyclerView();
-
-        // try {
-        //     runShellCommand("am force-stop com.evomotion.ui");
-        //     // runShellCommand("mkdir /sdcard/test001/");
-        // } catch (Exception e) {
-        //     e.printStackTrace();
-        // }
     }
 
     private void initRecyclerView() {
@@ -137,8 +128,6 @@ public class MainActivity extends AppCompatActivity {
         ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> runningServiceInfos = am.getRunningServices(1000);
 
-        mServiceNamesList = new ArrayList<>();
-        mPkgNameList = new ArrayList<>();
         mAppServiceInfoList = new ArrayList<>();
 
         // pkg manager
