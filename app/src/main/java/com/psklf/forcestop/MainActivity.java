@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,6 +30,7 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private SwipeRefreshLayout mSwipeLayout;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private MyRecyclerViewAdapter mAdapter;
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Hide button first
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        fab.hide();
+
+        initSwipeRefreshLayout();
 
         mRecyclerViewHandler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -63,8 +69,17 @@ public class MainActivity extends AppCompatActivity {
                         final int removePosition = msg.arg1;
                         removeItem(removePosition);
                         break;
-                    case PublicConstants.MSG_CHECK_SERVICE_FINISH:
+                    case PublicConstants.MSG_INIT_DATASET_FINISH:
                         initRecyclerView();
+                        if (mSwipeLayout != null) {
+                            mSwipeLayout.setRefreshing(false);
+                        }
+                        break;
+                    case PublicConstants.MSG_CHECK_SERVICE_FINISH:
+                        updateAdapter();
+                        if (mSwipeLayout != null) {
+                            mSwipeLayout.setRefreshing(false);
+                        }
                         break;
                     default:
                         break;
@@ -74,10 +89,13 @@ public class MainActivity extends AppCompatActivity {
 
         mExecutorService = Executors.newFixedThreadPool(5);
 
+        // initiate the list after finished set refreshing status false
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
                 getPkgList();
+                mRecyclerViewHandler.obtainMessage(PublicConstants.MSG_INIT_DATASET_FINISH)
+                        .sendToTarget();
             }
         });
     }
@@ -98,6 +116,12 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+
+        if (id == R.id.menu_refresh) {
+            mSwipeLayout.setRefreshing(true);
+            refreshList();
             return true;
         }
 
@@ -134,14 +158,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void removeItem(int removePosition) {
-        // first remove data from the source list
-
-        // update adapter
-        mAdapter.removeData(removePosition);
-
-    }
-
     /**
      * Add recycler view, this must be called in the main thread
      */
@@ -154,6 +170,27 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new MyRecyclerViewAdapter(mAppServiceInfoList, mRecyclerViewHandler,
                 getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    private int updateAdapter() {
+        if (mRecyclerView == null || mAdapter == null) {
+            Log.i(TAG, "Recycler view null can't update");
+            return 1;
+        }
+
+        mAdapter.update(mAppServiceInfoList);
+        return 0;
+    }
+
+    private void initSwipeRefreshLayout() {
+        mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.layout_swiperefresh);
+        mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshList();
+            }
+        });
+        mSwipeLayout.setRefreshing(true);
     }
 
     private void getPkgList() {
@@ -197,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
                                 applicationInfo);
                         appServiceInfo.initServiceList(info.service);
                         mAppServiceInfoList.add(appServiceInfo);
-                        Log.i(TAG, "  " + appServiceInfo.getPackageName());
+                        // Log.i(TAG, "  " + appServiceInfo.getPackageName());
                     }
                 }
 
@@ -255,6 +292,27 @@ public class MainActivity extends AppCompatActivity {
         errorResult.close();
 
         return ret;
+    }
+
+    private void removeItem(int removePosition) {
+        // update adapter
+        mAdapter.removeData(removePosition);
+    }
+
+    private void refreshList() {
+        // mAdapter.removeAll();
+        mAppServiceInfoList.clear();
+        Log.e(TAG, "size of data " + mAppServiceInfoList.size());
+
+        if (mExecutorService != null) {
+            mExecutorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    getPkgList();
+                }
+            });
+
+        }
     }
 
 }

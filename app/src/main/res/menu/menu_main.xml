@@ -7,4 +7,9 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_refresh"
+        android:showAsAction="never"
+        android:title="@string/menu_refresh"
+        tools:ignore="AppCompatResource"/>
 </menu>

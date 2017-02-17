@@ -14,7 +14,7 @@
     tools:context="com.psklf.forcestop.MainActivity"
     tools:showIn="@layout/activity_main">
     <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/demo_swiperefreshlayout"
+        android:id="@+id/layout_swiperefresh"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:scrollbars="vertical"

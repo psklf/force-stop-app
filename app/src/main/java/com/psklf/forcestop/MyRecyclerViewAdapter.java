@@ -144,4 +144,15 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         notifyItemRemoved(pos);
         notifyItemRangeChanged(pos, mDataSet.size());
     }
+
+    public void removeAll() {
+        mDataSet.clear();
+        notifyDataSetChanged();
+    }
+
+    public void update(ArrayList<AppServiceInfo> appServiceInfoArrayList) {
+        mDataSet = appServiceInfoArrayList;
+
+        notifyDataSetChanged();
+    }
 }
