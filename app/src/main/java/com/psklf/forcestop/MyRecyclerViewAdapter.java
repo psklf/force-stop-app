@@ -2,6 +2,7 @@ package com.psklf.forcestop;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -23,18 +25,20 @@ import java.util.ArrayList;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter
         .MyViewHolder> {
-    private ArrayList<AppServiceInfo> mNameArray;
+    private ArrayList<AppServiceInfo> mDataSet;
     private Handler mHandler;
     private Context mCtx;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
         public TextView mTextView;
+        public ImageView mIconView;
         private Switch mItemSwitch;
 
         public MyViewHolder(View view) {
             super(view);
             mTextView = (TextView) view.findViewById(R.id.tv_service_name);
+            mIconView = (ImageView) view.findViewById(R.id.imgv_icon);
             mItemSwitch = (Switch) view.findViewById(R.id.switch_item);
         }
     }
@@ -42,7 +46,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public MyRecyclerViewAdapter(ArrayList<AppServiceInfo> appServiceInfoArray,
                                  Handler handler,
                                  Context ctx) {
-        mNameArray = appServiceInfoArray;
+        mDataSet = appServiceInfoArray;
         mHandler = handler;
         mCtx = ctx;
     }
@@ -97,11 +101,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
      */
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
-        PackageManager packageManager = mCtx.getPackageManager();
-        CharSequence label = mNameArray.get(position).getApplicationInfo().loadLabel
-                (packageManager);
-        holder.mTextView.setText(label);
-
         holder.mItemSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -112,6 +111,18 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
                 }
             }
         });
+
+        PackageManager packageManager = mCtx.getPackageManager();
+
+        // set app name
+        CharSequence label = mDataSet.get(position).getApplicationInfo().loadLabel
+                (packageManager);
+        holder.mTextView.setText(label);
+
+        // set icon image
+        Drawable iconDrawable = mDataSet.get(position).getApplicationInfo().loadIcon
+                (packageManager);
+        holder.mIconView.setImageDrawable(iconDrawable);
     }
 
     /**
@@ -121,16 +132,16 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
      */
     @Override
     public int getItemCount() {
-        return mNameArray.size();
+        return mDataSet.size();
     }
 
     public void removeData(int pos) {
-        Log.i("xx", "pos " + pos + " size" + mNameArray.size());
+        Log.i("xx", "pos " + pos + " size" + mDataSet.size());
         // first remove data from the array list
-        mNameArray.remove(pos);
+        mDataSet.remove(pos);
 
         // notify self
         notifyItemRemoved(pos);
-        notifyItemRangeChanged(pos, mNameArray.size());
+        notifyItemRangeChanged(pos, mDataSet.size());
     }
 }
