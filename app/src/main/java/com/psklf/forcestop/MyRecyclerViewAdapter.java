@@ -26,6 +26,7 @@ import java.util.ArrayList;
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter
         .MyViewHolder> {
     private ArrayList<AppServiceInfo> mDataSet;
+    private OnRecyclerViewItemClickListener mOnItemClick;
     private Handler mHandler;
     private Context mCtx;
 
@@ -75,8 +76,8 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_view,
                 parent, false);
-
-        return new MyViewHolder(v);
+        MyViewHolder myViewHolder = new MyViewHolder(v);
+        return myViewHolder;
     }
 
     /**
@@ -112,6 +113,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
                 }
             }
         });
+        final int pos = position;
+        holder.mTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mOnItemClick.onItemClick(v, mDataSet.get(pos));
+            }
+        });
 
         PackageManager packageManager = mCtx.getPackageManager();
 
@@ -127,8 +135,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     }
 
     /**
-     * Returns the total number of items in the data set held by the adapter.
-     *
      * @return The total number of items in this adapter.
      */
     @Override
@@ -155,5 +161,16 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         mDataSet = appServiceInfoArrayList;
 
         notifyDataSetChanged();
+    }
+
+    public void setOnItemClickListener(OnRecyclerViewItemClickListener listener) {
+        this.mOnItemClick = listener;
+    }
+
+    /**
+     * Interface for click event
+     */
+    public interface OnRecyclerViewItemClickListener {
+        void onItemClick(View view, AppServiceInfo info);
     }
 }

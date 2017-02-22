@@ -2,6 +2,7 @@ package com.psklf.forcestop.activity;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -33,7 +34,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MyRecyclerViewAdapter
+        .OnRecyclerViewItemClickListener {
     private static final String TAG = "MainActivity";
     private SwipeRefreshLayout mSwipeLayout;
     private RecyclerView mRecyclerView;
@@ -174,11 +176,13 @@ public class MainActivity extends AppCompatActivity {
         // create a new adapter for recycler view
         mAdapter = new MyRecyclerViewAdapter(mAppServiceInfoList, mRecyclerViewHandler,
                 getApplicationContext());
+        mAdapter.setOnItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
     }
 
     /**
      * Call adapter to update the source data set
+     *
      * @return 1 if error.
      */
     private int updateAdapter() {
@@ -256,8 +260,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param command
-     * @return
+     * @param command shell command
+     * @return 0: all success;
      * @throws Exception
      */
     private int runShellCommand(String command) throws Exception {
@@ -324,4 +328,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onItemClick(View view, AppServiceInfo info) {
+        Intent intent = new Intent(this, AppInfoActivity.class);
+        intent.putExtra("info", info);
+        startActivity(intent);
+    }
 }
