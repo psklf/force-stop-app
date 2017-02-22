@@ -1,4 +1,4 @@
-package com.psklf.forcestop;
+package com.psklf.forcestop.activity;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -19,6 +19,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.psklf.forcestop.AppServiceInfo;
+import com.psklf.forcestop.MyRecyclerViewAdapter;
+import com.psklf.forcestop.PublicConstants;
+import com.psklf.forcestop.R;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
