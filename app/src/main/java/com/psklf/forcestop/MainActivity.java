@@ -172,6 +172,10 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
     }
 
+    /**
+     * Call adapter to update the source data set
+     * @return 1 if error.
+     */
     private int updateAdapter() {
         if (mRecyclerView == null || mAdapter == null) {
             Log.i(TAG, "Recycler view null can't update");

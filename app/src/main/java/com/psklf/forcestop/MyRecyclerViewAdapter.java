@@ -101,6 +101,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
      */
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
+        holder.mItemSwitch.setChecked(true);
         holder.mItemSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
