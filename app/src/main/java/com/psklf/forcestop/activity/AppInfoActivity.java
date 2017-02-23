@@ -3,6 +3,7 @@ package com.psklf.forcestop.activity;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -17,22 +18,33 @@ import java.util.ArrayList;
  */
 
 public class AppInfoActivity extends Activity {
-    private TextView mTextView;
+    private TextView mServices;
+    private TextView mName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_appinfo);
-        mTextView = (TextView) findViewById(R.id.tv_app_services);
+        mServices = (TextView) findViewById(R.id.tv_app_services);
+        mName = (TextView) findViewById(R.id.tv_app_info_name);
+
+        PackageManager packageManager = getPackageManager();
 
         Intent intent = getIntent();
         AppServiceInfo appServiceInfo = intent.getParcelableExtra("info");
+
+        // set application name
+        CharSequence label = appServiceInfo.getApplicationInfo().loadLabel
+                (packageManager);
+        mName.setText(label);
+
+        // show all services
         ArrayList<ComponentName> serviceList = appServiceInfo.getServiceList();
         for (ComponentName name : serviceList) {
             String c = name.getClassName();
-            mTextView.append(c);
-            mTextView.append("\n");
+            mServices.append(c);
+            mServices.append("\n");
         }
     }
 

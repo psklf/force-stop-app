@@ -4,9 +4,34 @@
                 android:layout_height="match_parent">
 
     <TextView
+        android:id="@+id/tv_app_info_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:textSize="18sp"/>
+
+    <View
+        android:id="@+id/line1_appinfo"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/tv_app_info_name"
+        android:layout_marginTop="3dp"
+        android:background="@android:color/darker_gray">
+    </View>
+
+    <TextView
+        android:id="@+id/tv_services_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/line1_appinfo"
+        android:layout_marginTop="5dp"
+        android:text="@string/services"/>
+
+    <TextView
         android:id="@+id/tv_app_services"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </TextView>
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_services_header"
+        android:layout_marginTop="5dp"/>
 
 </RelativeLayout>
