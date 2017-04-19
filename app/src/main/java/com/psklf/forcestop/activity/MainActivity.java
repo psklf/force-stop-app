@@ -256,9 +256,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param command
-     * @return
-     * @throws Exception
+     * @param command shell command
+     * @return 0 if success
+     * @throws Exception e
      */
     private int runShellCommand(String command) throws Exception {
         int ret = 0;
@@ -311,7 +311,6 @@ public class MainActivity extends AppCompatActivity {
     private void refreshList() {
         // mAdapter.removeAll();
         mAppServiceInfoList.clear();
-        Log.e(TAG, "size of data " + mAppServiceInfoList.size());
 
         if (mExecutorService != null) {
             mExecutorService.execute(new Runnable() {
