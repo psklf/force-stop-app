@@ -135,6 +135,13 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onItemClick(View view, AppServiceInfo info) {
+        Intent intent = new Intent(this, AppInfoActivity.class);
+        intent.putExtra("info", info);
+        startActivity(intent);
+    }
+
     private void stopApp(final int position) {
         AppServiceInfo appServiceInfo = mAppServiceInfoList.get(position);
         if (appServiceInfo == null) {
@@ -325,12 +332,5 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
             });
 
         }
-    }
-
-    @Override
-    public void onItemClick(View view, AppServiceInfo info) {
-        Intent intent = new Intent(this, AppInfoActivity.class);
-        intent.putExtra("info", info);
-        startActivity(intent);
     }
 }

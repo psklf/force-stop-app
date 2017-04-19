@@ -1,10 +1,11 @@
 package com.psklf.forcestop.activity;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.psklf.forcestop.AppServiceInfo;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
  * ForceStop
  */
 
-public class AppInfoActivity extends Activity {
+public class AppInfoActivity extends AppCompatActivity {
     private TextView mServices;
     private TextView mName;
 
@@ -38,6 +39,10 @@ public class AppInfoActivity extends Activity {
         CharSequence label = appServiceInfo.getApplicationInfo().loadLabel
                 (packageManager);
         mName.setText(label);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_appinfoview);
+        myToolbar.setSubtitle(label);
+        setSupportActionBar(myToolbar);
 
         // show all services
         ArrayList<ComponentName> serviceList = appServiceInfo.getServiceList();
