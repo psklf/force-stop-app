@@ -48,11 +48,11 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // Hide button first
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
      * Add recycler view, this must be called in the main thread
      */
     private void initRecyclerView() {
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mRecyclerView = findViewById(R.id.my_recycler_view);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
     }
 
     private void initSwipeRefreshLayout() {
-        mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.layout_swiperefresh);
+        mSwipeLayout = findViewById(R.id.layout_swiperefresh);
         mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {

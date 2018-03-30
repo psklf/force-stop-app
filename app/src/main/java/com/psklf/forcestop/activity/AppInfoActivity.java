@@ -27,8 +27,8 @@ public class AppInfoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_appinfo);
-        mServices = (TextView) findViewById(R.id.tv_app_services);
-        mName = (TextView) findViewById(R.id.tv_app_info_name);
+        mServices = findViewById(R.id.tv_app_services);
+        mName = findViewById(R.id.tv_app_info_name);
 
         PackageManager packageManager = getPackageManager();
 
@@ -40,7 +40,7 @@ public class AppInfoActivity extends AppCompatActivity {
                 (packageManager);
         mName.setText(label);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_appinfoview);
+        Toolbar myToolbar = findViewById(R.id.toolbar_appinfoview);
         myToolbar.setSubtitle(label);
         setSupportActionBar(myToolbar);
 
