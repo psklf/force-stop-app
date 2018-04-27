@@ -2,6 +2,8 @@ package com.psklf.forcestop;
 
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.ArrayList;
 
@@ -10,7 +12,7 @@ import java.util.ArrayList;
  * ForceStop
  */
 
-public class AppServiceInfo {
+public class AppServiceInfo implements Parcelable {
     private ArrayList<ComponentName> mServiceList;
     private ApplicationInfo mApplicationInfo;
     private String mPackageName;
@@ -48,4 +50,35 @@ public class AppServiceInfo {
     public void setPackageName(String packageName) {
         this.mPackageName = packageName;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(this.mServiceList);
+        dest.writeParcelable(this.mApplicationInfo, flags);
+        dest.writeString(this.mPackageName);
+    }
+
+    protected AppServiceInfo(Parcel in) {
+        this.mServiceList = in.createTypedArrayList(ComponentName.CREATOR);
+        this.mApplicationInfo = in.readParcelable(ApplicationInfo.class.getClassLoader());
+        this.mPackageName = in.readString();
+    }
+
+    public static final Parcelable.Creator<AppServiceInfo> CREATOR = new Parcelable
+            .Creator<AppServiceInfo>() {
+        @Override
+        public AppServiceInfo createFromParcel(Parcel source) {
+            return new AppServiceInfo(source);
+        }
+
+        @Override
+        public AppServiceInfo[] newArray(int size) {
+            return new AppServiceInfo[size];
+        }
+    };
 }

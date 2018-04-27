@@ -2,6 +2,7 @@ package com.psklf.forcestop.activity;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -33,7 +34,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MyRecyclerViewAdapter
+        .OnRecyclerViewItemClickListener {
     private static final String TAG = "MainActivity";
     private SwipeRefreshLayout mSwipeLayout;
     private RecyclerView mRecyclerView;
@@ -46,11 +48,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // Hide button first
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -133,6 +135,13 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onItemClick(View view, AppServiceInfo info) {
+        Intent intent = new Intent(this, AppInfoActivity.class);
+        intent.putExtra("info", info);
+        startActivity(intent);
+    }
+
     private void stopApp(final int position) {
         AppServiceInfo appServiceInfo = mAppServiceInfoList.get(position);
         if (appServiceInfo == null) {
@@ -167,18 +176,20 @@ public class MainActivity extends AppCompatActivity {
      * Add recycler view, this must be called in the main thread
      */
     private void initRecyclerView() {
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mRecyclerView = findViewById(R.id.my_recycler_view);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // create a new adapter for recycler view
         mAdapter = new MyRecyclerViewAdapter(mAppServiceInfoList, mRecyclerViewHandler,
                 getApplicationContext());
+        mAdapter.setOnItemClickListener(this);
         mRecyclerView.setAdapter(mAdapter);
     }
 
     /**
      * Call adapter to update the source data set
+     *
      * @return 1 if error.
      */
     private int updateAdapter() {
@@ -192,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initSwipeRefreshLayout() {
-        mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.layout_swiperefresh);
+        mSwipeLayout = findViewById(R.id.layout_swiperefresh);
         mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -257,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * @param command shell command
-     * @return 0 if success
+     * @return 0: all success
      * @throws Exception e
      */
     private int runShellCommand(String command) throws Exception {
@@ -322,5 +333,4 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
 }
